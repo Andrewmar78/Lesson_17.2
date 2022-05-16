@@ -105,44 +105,50 @@ class MovieView(Resource):
             return str(e), 404
 
 
-# @movie_ns.route('/')
-# class DirectorView(Resource):
-#     """Вьюшка вывода фильма по ID директора"""
-#     def get(self):
-#         try:
-#             director = request.args.get["director_id=", type == int]
-#             movies_by_director = db.session.query(Movie.id,
-#                                                   Movie.title,
-#                                                   Movie.description,
-#                                                   Movie.trailer,
-#                                                   Movie.year,
-#                                                   Movie.rating,
-#                                                   Genre.name,
-#                                                   Director.name
-#                                                   ).filter(Movie.director_id == director).join(Movie.director).all()
-#             return movie_schema.dump(movies_by_director), 200
-#         except Exception as e:
-#             return str(e), 404
+# Альтернативный вариант с URL "/directors/?director_id=":
+@director_ns.route('/')
+class DirectorView(Resource):
+    """Вьюшка вывода фильма по ID директора"""
+    def get(self):
+        try:
+            director = request.args.get("director_id", type=int)
+            if director:
+                movies_by_director = db.session.query(Movie.id,
+                                                      Movie.title,
+                                                      Movie.description,
+                                                      Movie.trailer,
+                                                      Movie.year,
+                                                      Movie.rating,
+                                                      Genre.name,
+                                                      Director.name
+                                                      ).filter(Movie.director_id == director)\
+                    .join(Movie.genre).join(Movie.director).all()
+                return movie_schema.dump(movies_by_director), 200
+        except Exception as e:
+            return str(e), 404
 
 
-# @movie_ns.route('/')
-# class GenreView(Resource):
-#     """Вьюшка вывода одного фильма по ID жанра"""
-#     def get(self):
-#         try:
-#             genre = request.args.get["genre_id=", type == int]
-#             movies_by_genre = db.session.query(Movie.id,
-#                                                Movie.title,
-#                                                Movie.description,
-#                                                Movie.trailer,
-#                                                Movie.year,
-#                                                Movie.rating,
-#                                                Genre.name,
-#                                                Director.name
-#                                                ).filter(Movie.genre_id == genre).join(Movie.genre).join(Movie.director).all()
-#             return movie_schema.dump(movies_by_genre), 200
-#         except Exception as e:
-#             return str(e), 404
+# Альтернативный вариант с URL "/genres/?genre_id=":
+@genre_ns.route('/')
+class GenreView(Resource):
+    """Вьюшка вывода фильмов по ID жанра"""
+    def get(self):
+        try:
+            genre = request.args.get("genre_id", type=int)
+            if genre:
+                movies_by_genre = db.session.query(Movie.id,
+                                                   Movie.title,
+                                                   Movie.description,
+                                                   Movie.trailer,
+                                                   Movie.year,
+                                                   Movie.rating,
+                                                   Genre.name,
+                                                   Director.name
+                                                   ).filter(Movie.genre_id == genre)\
+                    .join(Movie.director).join(Movie.genre).all()
+                return movie_schema.dump(movies_by_genre), 200
+        except Exception as e:
+            return str(e), 404
 
 
 if __name__ == '__main__':
